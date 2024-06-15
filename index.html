@@ -22,23 +22,34 @@
     attributeChangedCallback(name, oldValue, newValue) {
       this.querySelector(`.${name}`).innerText = newValue;
     }
+
+    set person(person) {
+      this.setAttribute('name', person.name);
+      this.setAttribute('birthdate', person.birthdate);
+    }
   }
   customElements.define('person-list-item', PersonLIElement, {extends: 'li'});
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    const resp = await fetch('http://localhost:3000/people');
-    const people = await resp.json();
+  class Person {
+    static async all() {
+      const resp = await fetch('http://localhost:3000/people');
+      const people = await resp.json();
+      return people;
+    }
+  }
 
+  document.addEventListener('DOMContentLoaded', async () => {
     const listElem = document.querySelector('ol#peopleList');
+
+    const people = await Person.all;
 
     for (const person of people) {
       const elem = document.createElement('li', {is: 'person-list-item'});
       listElem.appendChild(elem);
 
-      elem.setAttribute('name', person.name);
-      elem.setAttribute('birthdate', person.birthdate);
+      elem.person = person;
     }
   });
 </script>
