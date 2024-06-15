@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<title>Todo app</title>
+<script async type="module">
+  class PersonLIElement extends HTMLLIElement {
+    static observedAttributes = ['name', 'birthdate'];
+
+    constructor() {
+      super();
+
+      const tmpl = document.querySelector('#person');
+      const clone = tmpl.content.cloneNode(true);
+
+      this.appendChild(clone);
+    }
+
+    connectedCallback() {
+    }
+
+    disconnectedCallback() {
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      this.querySelector(`.${name}`).innerText = newValue;
+    }
+  }
+  customElements.define('person-list-item', PersonLIElement, {extends: 'li'});
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const resp = await fetch('http://localhost:3000/people');
+    const people = await resp.json();
+
+    const listElem = document.querySelector('ol#peopleList');
+
+    for (const person of people) {
+      const elem = document.createElement('li', {is: 'person-list-item'});
+      listElem.appendChild(elem);
+
+      elem.setAttribute('name', person.name);
+      elem.setAttribute('birthdate', person.birthdate);
+    }
+  });
+</script>
+<ol id="peopleList"></ol>
+
+<template id="person">
+  <h3 class="name"></h3>
+  <div class="birthdate"></div>
+</template>
+
